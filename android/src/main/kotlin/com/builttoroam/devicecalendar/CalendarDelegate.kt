@@ -962,15 +962,16 @@ class CalendarDelegate(binding: ActivityPluginBinding?, context: Context) :
             return null
         }
         val rfcRecurrenceRule = Rrule(recurrenceRuleString)
-        val frequency = when (rfcRecurrenceRule.freq) {
-            RruleFreq.YEARLY -> RruleFreq.YEARLY
-            RruleFreq.MONTHLY -> RruleFreq.MONTHLY
-            RruleFreq.WEEKLY -> RruleFreq.WEEKLY
-            RruleFreq.DAILY -> RruleFreq.DAILY
+        
+         val frequency = when (rfcRecurrenceRule.freq) {
+            Freq.WEEKLY, Freq.MONTHLY, Freq.YEARLY -> {
+                recurrenceRule.daysOfWeek = rfcRecurrenceRule.byDayPart?.mapNotNull {
+                    DayOfWeek.values().find { dayOfWeek -> dayOfWeek.ordinal == it.weekday.ordinal }
+                }?.toMutableList()
+            }
             else -> null
-        } ?: return null
-        //Avoid handling HOURLY/MINUTELY/SECONDLY frequencies for now
-
+        } 
+         
         val recurrenceRule = RecurrenceRule(frequency)
 
         recurrenceRule.count = rfcRecurrenceRule.count
